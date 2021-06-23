@@ -1,0 +1,53 @@
+const { from, Observable } = require('rxjs')
+
+function primeiro() {
+	return function(source) {
+		return new Observable(subscriber => {
+			source.subscribe({
+				next(v) {
+					subscriber.next(v + 1000)
+					subscriber.complete()
+				}
+			})
+		})
+	}
+}
+
+function nenhum() {
+	return function(source) {
+		return new Observable(subscriber => {
+			source.subscribe({
+				next(v) {				
+					subscriber.complete()
+				}
+			})
+		})
+	}
+}
+
+function ultimo() {
+	return function(source) {
+		return new Observable(subscriber => {
+			let ultimo
+			source.subscribe({
+				next(v) {
+					ultimo = v
+				},
+				complete() {
+					if(ultimo !== undefined) {
+						subscriber.next(ultimo)					
+						subscriber.complete()
+					}
+				}
+			})
+		})
+	}
+}
+
+from([1, 2, 3, 4, 5])
+	.pipe(
+		// primeiro(),
+		// nenhum(),
+		ultimo()
+	)
+	.subscribe(console.log)
